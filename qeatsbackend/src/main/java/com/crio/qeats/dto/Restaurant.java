@@ -8,6 +8,7 @@
 package com.crio.qeats.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
 import javax.validation.constraints.NotNull;
@@ -35,5 +36,48 @@ import lombok.NoArgsConstructor;
 
 public class Restaurant {
 
+    @JsonProperty("restaurantId")
+    private String restaurantId;
+
+    @JsonProperty("name")
+    private String name;
+
+    @JsonProperty("city")
+    private String city;
+
+    @JsonProperty("imageUrl")
+    private String imageUrl;
+
+    @JsonProperty("latitude")
+    private Double latitude;
+
+    @JsonProperty("longitude")
+    private Double longitude;
+  
+    @JsonProperty("opensAt")
+    private String opensAt;
+
+    @JsonProperty("closesAt")
+    private String closesAt;
+
+    @JsonProperty("attributes")
+    private List<String> attributes;
+  
+    public Restaurant() {
+    }
+  
+    public Restaurant(String restaurantId, String name, String city, String imageUrl, Double latitude, Double longitude, String opensAt, String closesAt, List<String> attributes) {
+      this.restaurantId = restaurantId;
+      this.name = name;
+      this.city = city;
+      this.imageUrl = imageUrl;
+      this.latitude = latitude;
+      this.longitude = longitude;
+      this.opensAt = opensAt;
+      this.closesAt = closesAt;
+      this.attributes = attributes;
+    }
+    
+    
 }
 
