@@ -34,6 +34,10 @@ import lombok.NoArgsConstructor;
 //  ]
 // }
 
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Restaurant {
 
     @JsonProperty("restaurantId")
@@ -63,20 +67,20 @@ public class Restaurant {
     @JsonProperty("attributes")
     private List<String> attributes;
   
-    public Restaurant() {
-    }
+    // public Restaurant() {
+    // }
   
-    public Restaurant(String restaurantId, String name, String city, String imageUrl, Double latitude, Double longitude, String opensAt, String closesAt, List<String> attributes) {
-      this.restaurantId = restaurantId;
-      this.name = name;
-      this.city = city;
-      this.imageUrl = imageUrl;
-      this.latitude = latitude;
-      this.longitude = longitude;
-      this.opensAt = opensAt;
-      this.closesAt = closesAt;
-      this.attributes = attributes;
-    }
+    // public Restaurant(String restaurantId, String name, String city, String imageUrl, Double latitude, Double longitude, String opensAt, String closesAt, List<String> attributes) {
+    //   this.restaurantId = restaurantId;
+    //   this.name = name;
+    //   this.city = city;
+    //   this.imageUrl = imageUrl;
+    //   this.latitude = latitude;
+    //   this.longitude = longitude;
+    //   this.opensAt = opensAt;
+    //   this.closesAt = closesAt;
+    //   this.attributes = attributes;
+    // }
     
     
 }

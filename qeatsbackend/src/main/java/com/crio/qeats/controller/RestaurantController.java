@@ -9,6 +9,7 @@ package com.crio.qeats.controller;
 import com.crio.qeats.exchanges.GetRestaurantsRequest;
 import com.crio.qeats.exchanges.GetRestaurantsResponse;
 import com.crio.qeats.services.RestaurantService;
+import com.crio.qeats.services.RestaurantServiceImpl;
 import java.time.LocalTime;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
@@ -26,6 +27,8 @@ import org.springframework.web.bind.annotation.RestController;
 // Implement Controller using Spring annotations.
 // Remember, annotations have various "targets". They can be class level, method level or others.
 
+@RestController
+@Log4j2
 public class RestaurantController {
 
   public static final String RESTAURANT_API_ENDPOINT = "/qeats/v1";
@@ -38,24 +41,41 @@ public class RestaurantController {
   public static final String GET_ORDERS_API = "/orders";
 
   @Autowired
-  private RestaurantService restaurantService;
+  private RestaurantService restaurantService = new RestaurantServiceImpl();
 
 
 
-  @GetMapping(RESTAURANTS_API)
-  public ResponseEntity<GetRestaurantsResponse> getRestaurants(
-       GetRestaurantsRequest getRestaurantsRequest) {
+  @GetMapping(RESTAURANT_API_ENDPOINT+RESTAURANTS_API)
+  public ResponseEntity<GetRestaurantsResponse> getRestaurants(@RequestParam(required = false) Double latitude, @RequestParam(required = false) Double longitude) {
 
-    log.info("getRestaurants called with {}", getRestaurantsRequest);
+    
+    // log.info("getRestaurants called with {}", getRestaurantsRequest);
     GetRestaurantsResponse getRestaurantsResponse;
 
-      //CHECKSTYLE:OFF
-      getRestaurantsResponse = restaurantService
-          .findAllRestaurantsCloseBy(getRestaurantsRequest, LocalTime.now());
-      log.info("getRestaurants returned {}", getRestaurantsResponse);
-      //CHECKSTYLE:ON
+    if (latitude == null || longitude == null) {
+      return ResponseEntity.badRequest().build();
+    }
+
+
+    if (!isValidLatitude(latitude) || !isValidLongitude(longitude)) {
+      return ResponseEntity.badRequest().build();
+    }
+
+    //CHECKSTYLE:OFF
+    GetRestaurantsRequest rq = new GetRestaurantsRequest(latitude, longitude);
+    getRestaurantsResponse = restaurantService.findAllRestaurantsCloseBy(rq, LocalTime.now());
+    log.info("getRestaurants returned {}", getRestaurantsResponse);
+    //CHECKSTYLE:ON
 
     return ResponseEntity.ok().body(getRestaurantsResponse);
+  }
+
+  private boolean isValidLatitude(double latitude) {
+    return latitude >= -90 && latitude <= 90;
+  }
+
+  private boolean isValidLongitude(double longitude) {
+    return longitude >= -180 && longitude <= 180;
   }
 
   // TIP(MODULE_MENUAPI): Model Implementation for getting menu given a restaurantId.
@@ -91,16 +111,7 @@ public class RestaurantController {
   // Eg:
   // curl -X GET "http://localhost:8081/qeats/v1/menu?restaurantId=11"
 
-
-
-
-
-
-
-
-
-
-
+  // curl -X GET "http://localhost:8081/qeats/v1/restaurants?latitude=28.4900591&longitude=77.536386"
 
 }
 

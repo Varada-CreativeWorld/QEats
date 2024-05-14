@@ -11,6 +11,7 @@ import com.crio.qeats.dto.Restaurant;
 import com.crio.qeats.exchanges.GetRestaurantsRequest;
 import com.crio.qeats.exchanges.GetRestaurantsResponse;
 import com.crio.qeats.repositoryservices.RestaurantRepositoryService;
+import com.crio.qeats.repositoryservices.RestaurantRepositoryServiceDummyImpl;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,7 +32,7 @@ public class RestaurantServiceImpl implements RestaurantService {
   private final Double peakHoursServingRadiusInKms = 3.0;
   private final Double normalHoursServingRadiusInKms = 5.0;
   @Autowired
-  private RestaurantRepositoryService restaurantRepositoryService;
+  private RestaurantRepositoryService restaurantRepositoryService = new RestaurantRepositoryServiceDummyImpl();
 
 
   // TODO: CRIO_TASK_MODULE_RESTAURANTSAPI - Implement findAllRestaurantsCloseby.
@@ -40,8 +41,10 @@ public class RestaurantServiceImpl implements RestaurantService {
   public GetRestaurantsResponse findAllRestaurantsCloseBy(
       GetRestaurantsRequest getRestaurantsRequest, LocalTime currentTime) {
 
-
-     return null;
+      List<Restaurant> restaurants = restaurantRepositoryService.findAllRestaurantsCloseBy(getRestaurantsRequest.getLatitude(), getRestaurantsRequest.getLongitude(), currentTime, normalHoursServingRadiusInKms);
+      GetRestaurantsResponse response = new GetRestaurantsResponse();
+      response.setRestaurants(restaurants);
+      return response;
   }
 
 
