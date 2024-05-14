@@ -41,11 +41,29 @@ public class RestaurantServiceImpl implements RestaurantService {
   public GetRestaurantsResponse findAllRestaurantsCloseBy(
       GetRestaurantsRequest getRestaurantsRequest, LocalTime currentTime) {
 
-      List<Restaurant> restaurants = restaurantRepositoryService.findAllRestaurantsCloseBy(getRestaurantsRequest.getLatitude(), getRestaurantsRequest.getLongitude(), currentTime, normalHoursServingRadiusInKms);
+      boolean isPeakHours = isPeakHours(currentTime);
+      double serviceRadius = isPeakHours ? peakHoursServingRadiusInKms : normalHoursServingRadiusInKms;
+      
+      List<Restaurant> restaurants = restaurantRepositoryService.findAllRestaurantsCloseBy(getRestaurantsRequest.getLatitude(), getRestaurantsRequest.getLongitude(), currentTime, serviceRadius);
       GetRestaurantsResponse response = new GetRestaurantsResponse();
       response.setRestaurants(restaurants);
       return response;
   }
+
+
+  private boolean isPeakHours(LocalTime currentTime) {
+    // Define peak hours: 8AM - 10AM, 1PM-2PM, 7PM-9PM
+    LocalTime peakStartMorning = LocalTime.of(8, 0);
+    LocalTime peakEndMorning = LocalTime.of(10, 0);
+    LocalTime peakStartAfternoon = LocalTime.of(13, 0);
+    LocalTime peakEndAfternoon = LocalTime.of(14, 0);
+    LocalTime peakStartEvening = LocalTime.of(19, 0);
+    LocalTime peakEndEvening = LocalTime.of(21, 0);
+
+    return (currentTime.compareTo(peakStartMorning) >= 0 && currentTime.compareTo(peakEndMorning) <= 0) ||
+           (currentTime.compareTo(peakStartAfternoon) >= 0 && currentTime.compareTo(peakEndAfternoon) <= 0) ||
+           (currentTime.compareTo(peakStartEvening) >= 0 && currentTime.compareTo(peakEndEvening) <= 0);
+}
 
 
 }
