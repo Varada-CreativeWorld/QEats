@@ -71,7 +71,7 @@ public class RestaurantController {
   }
 
   private boolean isValidLatitude(double latitude) {
-    return latitude != null ? latitude >= -90 && latitude <= 90 : false;
+    return latitude >= -90 && latitude <= 90;
   }
 
   private boolean isValidLongitude(double longitude) {
