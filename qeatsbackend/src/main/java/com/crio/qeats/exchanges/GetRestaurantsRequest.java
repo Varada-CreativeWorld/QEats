@@ -9,6 +9,7 @@ package com.crio.qeats.exchanges;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,11 +27,11 @@ import lombok.NonNull;
 @AllArgsConstructor
 public class GetRestaurantsRequest {
 
+   @JsonInclude(JsonInclude.Include.NON_NULL)
     private Double latitude;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Double longitude;
-
-
 
 
 }

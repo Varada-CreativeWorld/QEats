@@ -46,23 +46,23 @@ public class RestaurantController {
 
 
   @GetMapping(RESTAURANT_API_ENDPOINT+RESTAURANTS_API)
-  public ResponseEntity<GetRestaurantsResponse> getRestaurants(@RequestParam(required = false) Double latitude, @RequestParam(required = false) Double longitude) {
+  public ResponseEntity<GetRestaurantsResponse> getRestaurants(GetRestaurantsRequest rq) {
 
     
     // log.info("getRestaurants called with {}", getRestaurantsRequest);
     GetRestaurantsResponse getRestaurantsResponse;
 
-    if (latitude == null || longitude == null) {
+    if (rq.getLatitude() == null || rq.getLongitude() == null) {
       return ResponseEntity.badRequest().build();
     }
 
 
-    if (!isValidLatitude(latitude) || !isValidLongitude(longitude)) {
+    if (!isValidLatitude(rq.getLatitude()) || !isValidLongitude(rq.getLongitude())) {
       return ResponseEntity.badRequest().build();
     }
 
     //CHECKSTYLE:OFF
-    GetRestaurantsRequest rq = new GetRestaurantsRequest(latitude, longitude);
+    // GetRestaurantsRequest rq = new GetRestaurantsRequest(latitude, longitude);
     getRestaurantsResponse = restaurantService.findAllRestaurantsCloseBy(rq, LocalTime.now());
     log.info("getRestaurants returned {}", getRestaurantsResponse);
     //CHECKSTYLE:ON
@@ -71,7 +71,7 @@ public class RestaurantController {
   }
 
   private boolean isValidLatitude(double latitude) {
-    return latitude >= -90 && latitude <= 90;
+    return latitude != null ? latitude >= -90 && latitude <= 90 : false;
   }
 
   private boolean isValidLongitude(double longitude) {
