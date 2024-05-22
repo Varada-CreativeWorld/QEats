@@ -64,7 +64,16 @@ public class RestaurantRepositoryServiceImpl implements RestaurantRepositoryServ
   public List<Restaurant> findAllRestaurantsCloseBy(Double latitude,
       Double longitude, LocalTime currentTime, Double servingRadiusInKms) {
 
-    List<Restaurant> restaurants = null;
+    List<Restaurant> restaurants = new ArrayList<>();
+    List<RestaurantEntity> results = mongoTemplate.query(RestaurantEntity.class).all();
+    for(RestaurantEntity res: results){
+      if(isRestaurantCloseByAndOpen(res, currentTime, latitude, longitude, servingRadiusInKms)){
+        // Game game = new Game(1L, "Game 1");
+        // GameDTO gameDTO = this.mapper.map(game, GameDTO.class);
+        Restaurant temp = ((ModelMapper) modelMapperProvider).map(res, Restaurant.class);
+        restaurants.add(temp);
+      }
+    }
 
 
       //CHECKSTYLE:OFF
