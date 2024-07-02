@@ -1,9 +1,3 @@
-/*
- *
- *  * Copyright (c) Crio.Do 2019. All rights reserved
- *
- */
-
 package com.crio.qeats.repositoryservices;
 
 import ch.hsr.geohash.GeoHash;
@@ -28,6 +22,7 @@ import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
@@ -37,11 +32,10 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
-
 @Service
 @Primary
+@Slf4j
 public class RestaurantRepositoryServiceImpl implements RestaurantRepositoryService {
-
 
   @Autowired
   private MongoTemplate mongoTemplate;
@@ -59,62 +53,49 @@ public class RestaurantRepositoryServiceImpl implements RestaurantRepositoryServ
     return time.isAfter(openingTime) && time.isBefore(closingTime);
   }
 
-  // TODO: CRIO_TASK_MODULE_NOSQL
-  // Objectives:
-  // 1. Implement findAllRestaurantsCloseby.
-  // 2. Remember to keep the precision of GeoHash in mind while using it as a key.
-  // Check RestaurantRepositoryService.java file for the interface contract.
+  @Override
   public List<Restaurant> findAllRestaurantsCloseBy(Double latitude,
       Double longitude, LocalTime currentTime, Double servingRadiusInKms) {
 
+    log.info("findAllRestaurantsCloseBy called with latitude: {}, longitude: {}, currentTime: {}, servingRadiusInKms: {}",
+        latitude, longitude, currentTime, servingRadiusInKms);
+
     List<Restaurant> restaurants = new ArrayList<>();
     List<RestaurantEntity> results = restaurantRepository.findAll();
+
+    log.info("Total restaurants fetched from repository: {}", results.size());
+
     ModelMapper modelMapper = modelMapperProvider.get();
-    for(RestaurantEntity res: results){
-      if(isRestaurantCloseByAndOpen(res, currentTime, latitude, longitude, servingRadiusInKms)){
-        // Game game = new Game(1L, "Game 1");
-        // GameDTO gameDTO = this.mapper.map(game, GameDTO.class);
+    for (RestaurantEntity res : results) {
+      log.info("Checking if restaurant {} is close by and open", res.getRestaurantId());
+      if (isRestaurantCloseByAndOpen(res, currentTime, latitude, longitude, servingRadiusInKms)) {
         Restaurant temp = modelMapper.map(res, Restaurant.class);
         restaurants.add(temp);
+        log.info("Restaurant {} is added to the list", res.getRestaurantId());
+      } else {
+        log.info("Restaurant {} is not close by or not open", res.getRestaurantId());
       }
     }
 
-
-      //CHECKSTYLE:OFF
-      //CHECKSTYLE:ON
-
-
-    return restaurants;
+    log.info("Total restaurants found close by and open: {}", restaurants.size());
+    List<Restaurant> topRestaurants = restaurants.size() > 5 ? restaurants.subList(0, 5) : restaurants;
+    return topRestaurants;
   }
 
-
-
-
-
-
-
-
-  // TODO: CRIO_TASK_MODULE_NOSQL
-  // Objective:
-  // 1. Check if a restaurant is nearby and open. If so, it is a candidate to be returned.
-  // NOTE: How far exactly is "nearby"?
-
-  /**
-   * Utility method to check if a restaurant is within the serving radius at a given time.
-   * @return boolean True if restaurant falls within serving radius and is open, false otherwise
-   */
   private boolean isRestaurantCloseByAndOpen(RestaurantEntity restaurantEntity,
       LocalTime currentTime, Double latitude, Double longitude, Double servingRadiusInKms) {
     if (isOpenNow(currentTime, restaurantEntity)) {
-      return GeoUtils.findDistanceInKm(latitude, longitude,
-          restaurantEntity.getLatitude(), restaurantEntity.getLongitude())
-          < servingRadiusInKms;
+      double distance = GeoUtils.findDistanceInKm(latitude, longitude,
+          restaurantEntity.getLatitude(), restaurantEntity.getLongitude());
+      boolean isCloseBy = distance < servingRadiusInKms*1000;
+
+      log.info("Restaurant {} is open now. Distance from the user: {}. Is within serving radius: {}",
+          restaurantEntity.getRestaurantId(), distance, isCloseBy);
+
+      return isCloseBy;
+    } else {
+      log.info("Restaurant {} is not open now", restaurantEntity.getRestaurantId());
+      return false;
     }
-
-    return false;
   }
-
-
-
 }
-
