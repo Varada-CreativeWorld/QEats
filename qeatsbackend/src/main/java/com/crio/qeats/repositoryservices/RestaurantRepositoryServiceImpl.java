@@ -78,7 +78,7 @@ public class RestaurantRepositoryServiceImpl implements RestaurantRepositoryServ
     }
 
     log.info("Total restaurants found close by and open: {}", restaurants.size());
-    List<Restaurant> topRestaurants = restaurants.size() > 5 ? restaurants.subList(0, 5) : restaurants;
+    List<Restaurant> topRestaurants = restaurants.size() > 100 ? restaurants.subList(0, 100) : restaurants;
     return topRestaurants;
     // return restaurants;
   }
@@ -88,7 +88,7 @@ public class RestaurantRepositoryServiceImpl implements RestaurantRepositoryServ
     if (isOpenNow(currentTime, restaurantEntity)) {
       double distance = GeoUtils.findDistanceInKm(latitude, longitude,
           restaurantEntity.getLatitude(), restaurantEntity.getLongitude());
-      boolean isCloseBy = distance < servingRadiusInKms*1000;
+      boolean isCloseBy = distance < servingRadiusInKms;
 
       log.info("Restaurant {} is open now. Distance from the user: {}. Is within serving radius: {}",
           restaurantEntity.getRestaurantId(), distance, isCloseBy);
