@@ -53,6 +53,20 @@ public class RestaurantRepositoryServiceImpl implements RestaurantRepositoryServ
     return time.isAfter(openingTime) && time.isBefore(closingTime);
   }
 
+  private String sanitizeRestaurantName(String name) {
+    StringBuilder sanitized = new StringBuilder();
+
+    for (char c : name.toCharArray()) {
+        if (Character.isLetter(c) || c == ' ') {
+            sanitized.append(c);
+        } else {
+            sanitized.append(' '); // Replace non-alphabetic characters with space
+        }
+    }
+
+    return sanitized.toString().trim(); // Trim trailing spaces
+}
+
   @Override
   public List<Restaurant> findAllRestaurantsCloseBy(Double latitude,
       Double longitude, LocalTime currentTime, Double servingRadiusInKms) {
@@ -68,6 +82,10 @@ public class RestaurantRepositoryServiceImpl implements RestaurantRepositoryServ
     ModelMapper modelMapper = modelMapperProvider.get();
     for (RestaurantEntity res : results) {
       log.info("Checking if restaurant {} is close by and open", res.getRestaurantId());
+
+      String sanitizedName = sanitizeRestaurantName(res.getName());
+      res.setName(sanitizedName); // Update the name in entity if sanitized
+
       if (isRestaurantCloseByAndOpen(res, currentTime, latitude, longitude, servingRadiusInKms)) {
         Restaurant temp = modelMapper.map(res, Restaurant.class);
         restaurants.add(temp);

@@ -1,0 +1,221 @@
+latitude value not set in coordinates.txt, using default
+[32;1mPlease read this FAQ for more details - https://forum.crio.do/t/14751
+ value not set in coordinates.txt, using default
+[32;1mPlease read this FAQ for more details - https://forum.crio.do/t/14751
+Please note down location coordinates which we are populating data for - 
+( latitude = 12.9, longiyide = 77.8 )
+If you think this is incorrect, check your coordinates.txt file.
+[32;1mPlease read this FAQ for more details - https://forum.crio.do/t/14751
+Already up to date.
+MongoDB is running...
+MongoDB shell version v5.0.22
+connecting to: mongodb://127.0.0.1:27017/restaurant-database?compressors=disabled&gssapiServiceName=mongodb
+Implicit session: session { "id" : UUID("6884559a-127b-4e3c-8014-48634d8214ea") }
+MongoDB server version: 5.0.22
+{ "ok" : 1 }
+Defaulting to user installation because normal site-packages is not writeable
+Requirement already satisfied: pymongo in /home/crio-user/.local/lib/python3.6/site-packages (4.1.1)
+Localizing restaurants for your region, so that you can see them when you load the app...
+Accepting co-ordinates in the format {latitude} {longitude} {num_restaurants_to_change}. For ex: 12.01 27.66 200
+Number of arguments passed to localize_restaurants 4
+Bake-a-boo
+China Gatherings
+Crazy Bhukkhad
+Deez Biryani & Kebabs
+Happy Beings
+InstaDozza
+Mom's Kitchen
+The Baker's Bar  ... Bakery & Café
+Veg Ex
+Volt - By Plan B
+ZASTY
+Aahar
+Chicken Bytes
+Punjabi Tadka
+Coldpress Company
+Crudo Juicery
+Kashmiri Kitchen
+Kebab Gali
+Monster's Café
+Wah! Amritsar
+World In A Box
+Bun Intended
+Café Gatherings
+Café Soul Garden
+Food O Gram
+Happy Hakka
+Kaiser
+Pizza Central
+Oh! Fudge
+IZU
+Sugar & Spice - Le Marche
+ChandChini
+Coffee & Chai Co.
+Mediumwelldone
+Soul & Spice Co.
+7 Degrees Brauhaus
+Café Amaretto
+Sibang Bakery
+The Hangout by 1861
+The Mad Teapot/The Wishing Chair
+Zaffran
+Spiritual Bar & Lounge-DoubleTree by Hilton
+The Food Store - DoubleTree by Hilton
+KFC
+Shree Rathnam
+Mogli's Coffee
+Pind Balluchi
+Sip n Bite
+Abar Khabo
+Moti Mahal Delux
+The Lost Mughal
+Fortune Deli - Fortune Select Excalibur
+India on my Plate - Fortune Select Excalibur
+Orchid - Fortune Select Global
+Karim's
+Kuuraku
+Vapour Bar Exchange
+19 Flavours Biryani
+Bhai Ji Foods
+Captain Bill$ Deliverz
+Midnight Cravings Beyond Control
+Outback
+Dudleys
+56 Ristorante Italiano
+All Time Café
+Baba's
+Chilli Indiana
+Go Kylin
+Just for Chai
+Kabab Mistri
+Nashta
+Nooba
+Side Wok
+Takamaka
+The Ark
+Wangchuk's Ladakhi Kitchen
+Daawat-e-Kashmir
+La Pino'z Pizza
+The Bridge - Hotel Clark Inn Gurgaon
+Gardenia - Hotel Grenville
+Citron - Hotel Haut.Monde
+Gabbar Meals
+Dunkin' Donuts
+Starbucks
+Eggers Madhouse
+Gallery Cafí© - Hyatt Place
+Coffee to Cocktail Bar - Hyatt Place
+Spice It - Hotel IBIS
+Nukkadwala
+Power Play Resto Bar
+Daikichi
+The Atrium - By Jukaso It Suites
+Delhi - Kingdom of Dreams
+I-Kandy - Le Meridien Gurgaon
+Bella Cucina - Le Meridien Gurgaon
+Bites - Leisure Inn
+Outback Bar and Grill - Leisure Inn
+Ammu's South Indian Restaurant
+Bengali By Nature
+E Yum
+Handi X-Press
+Ion Club & Dining Lounge
+Komachi
+Mezbaan's
+Pita Pan
+Coriander Leaf
+Doughlicious
+L'Angoor
+The Cakelicious Factory
+Love Is Cakes
+Vapour Pub & Brewery
+Pirates of Grill
+Barista Creme Lavazza
+McDonald's
+Mr Idli Xpress
+buí©no
+Starbucks
+Al Kabab
+Bangkok 1
+Café Cravings
+Hello Sichuan
+Street Foods by Punjab Grill
+Subway
+Tibb's Frankie
+Tunday Kababi Dastarkhwan-e-Awadh
+Dunkin' Donuts
+Haldiram's
+Khaaja Chowk
+Phantom
+Sage
+TGI Friday's
+The Belgian Fries Company
+The Grills King
+Suburbia - The Empire
+Queens Cafí©
+FOA - The Flavours of Arabia
+Apni Rasoi
+DBDN Deena Meat Vala
+Deep Chicken Corner
+French Omelette
+Green Chick Chop
+Hangout Café
+Hari Om Rasoi
+Harish Phulwari
+Hotel Rajvanshi Restaurant
+Jagdish Vaishno Dhaba
+Kaza
+Knight Delight Kafe
+Ko Jitters
+Laajawab Chaap Express
+Laddu Gopal
+Mini's Royal Café
+Pakwan
+Patiala
+Pind Balluchi
+Pizza Man
+Punjabi Dhani
+Raju Halwai
+Rupa Tikki Wala And Caterers
+Samrat The Cake Shoppe
+Samrat
+Sanjha Chula
+Silver Crown
+Super Bakery
+The Chic
+Unique Bus Wales
+Dilli 6 Express
+Mangle Di Kulfi
+The Oven Artist
+The Burger Hub
+Pizza Café Delivery
+Hot Cherries
+Domino's Pizza
+Coldpress Company
+Shree Rathnam
+Caffe Tonino
+Carl's Jr.
+Delhi Club House
+Baskin Robbins
+Bikaner Sweets & Restaurant
+Burger Bites & More
+Chawla Bakers
+Crust N Cakes
+Darjeeling Kanchanjanga Momos
+Desserts 83
+Giani's
+Hangover
+Sangam Sweets
+Shree Bikaner Misthan Bhandar
+Shree Shyam Rasoi
+Swad On Grill
+Annapoorna Foods
+Bakelicious 18
+Bansiwala Sweets
+Hot Fork
+Indochi Café & Restaurant
+M CríÂme
+Radha Swami Shudh Vaishno Dhaba
+Shree Bikaner Mishthan Bhandar
+Shree Shyam Bhojnalaya
+200 Restaurants around 12.9,77.8 co-ordinates created.
