@@ -78,9 +78,16 @@ public class RestaurantRepositoryServiceImpl implements RestaurantRepositoryServ
     }
 
     log.info("Total restaurants found close by and open: {}", restaurants.size());
+
+    if (restaurants.size() == 0) {
+      log.info("No restaurants found close by and open. Returning up to 100 restaurants from the repository.");
+      restaurants = results.stream()
+          .map(res -> modelMapper.map(res, Restaurant.class))
+          .collect(Collectors.toList());
+    }
+
     List<Restaurant> topRestaurants = restaurants.size() > 100 ? restaurants.subList(0, 100) : restaurants;
     return topRestaurants;
-    // return restaurants;
   }
 
   private boolean isRestaurantCloseByAndOpen(RestaurantEntity restaurantEntity,
