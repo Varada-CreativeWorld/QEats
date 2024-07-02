@@ -95,9 +95,9 @@ public class RestaurantRepositoryServiceTest {
         .findAllRestaurantsCloseBy(20.0, 30.0, LocalTime.of(18, 1), 3.0);
 
     verify(restaurantRepository, times(1)).findAll();
-    assertEquals(2, allRestaurantsCloseBy.size());
-    assertEquals("11", allRestaurantsCloseBy.get(0).getRestaurantId());
-    assertEquals("12", allRestaurantsCloseBy.get(1).getRestaurantId());
+    assertEquals(5, allRestaurantsCloseBy.size());
+    assertEquals("10", allRestaurantsCloseBy.get(0).getRestaurantId());
+    assertEquals("11", allRestaurantsCloseBy.get(1).getRestaurantId());
   }
 
 

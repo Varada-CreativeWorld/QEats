@@ -80,6 +80,7 @@ public class RestaurantRepositoryServiceImpl implements RestaurantRepositoryServ
     log.info("Total restaurants found close by and open: {}", restaurants.size());
     List<Restaurant> topRestaurants = restaurants.size() > 5 ? restaurants.subList(0, 5) : restaurants;
     return topRestaurants;
+    // return restaurants;
   }
 
   private boolean isRestaurantCloseByAndOpen(RestaurantEntity restaurantEntity,
