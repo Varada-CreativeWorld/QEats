@@ -74,20 +74,16 @@ public class RestaurantController {
   private String sanitizeRestaurantName(String name) {
     // Normalize the string to decompose special characters
     String normalized = Normalizer.normalize(name, Normalizer.Form.NFD);
-    log.info("Normalized: {}", normalized); // Debug log for normalized string
 
     // Remove all combining diacritical marks
     Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
     String withoutDiacritics = pattern.matcher(normalized).replaceAll("");
-    log.info("Without Diacritics: {}", withoutDiacritics); // Debug log for string without diacritics
 
     // Remove all non-alphabetic characters
-    String sanitized = withoutDiacritics.replaceAll("[^a-zA-Z ]", " ");
-    log.info("After Removing Non-Alphabetic Characters: {}", sanitized); // Debug log for sanitized string
+    String sanitized = withoutDiacritics.replaceAll("[^a-zA-Z ]", "");
 
     // Trim extra spaces
     sanitized = sanitized.replaceAll("\\s+", " ").trim();
-    log.info("Final Sanitized: {}", sanitized); // Debug log for final sanitized string
 
     return sanitized;
 }
