@@ -1,9 +1,13 @@
 package com.crio.qeats.controller;
 
+import com.crio.qeats.dto.Restaurant;
 import com.crio.qeats.exchanges.GetRestaurantsRequest;
 import com.crio.qeats.exchanges.GetRestaurantsResponse;
 import com.crio.qeats.services.RestaurantService;
+import java.text.Normalizer;
 import java.time.LocalTime;
+import java.util.List;
+import java.util.regex.Pattern;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +48,13 @@ public class RestaurantController {
 
     try {
       GetRestaurantsResponse getRestaurantsResponse = restaurantService.findAllRestaurantsCloseBy(rq, LocalTime.now());
+      
+      // Sanitize restaurant names
+      getRestaurantsResponse.getRestaurants().forEach(restaurant -> {
+        String sanitized = sanitizeRestaurantName(restaurant.getName());
+        restaurant.setName(sanitized);
+      });
+
       log.info("getRestaurants returned {}", getRestaurantsResponse);
       return ResponseEntity.ok().body(getRestaurantsResponse);
     } catch (Exception e) {
@@ -59,4 +70,26 @@ public class RestaurantController {
   private boolean isValidLongitude(double longitude) {
     return longitude >= -180 && longitude <= 180;
   }
+
+  private String sanitizeRestaurantName(String name) {
+    // Normalize the string to decompose special characters
+    String normalized = Normalizer.normalize(name, Normalizer.Form.NFD);
+    log.info("Normalized: {}", normalized); // Debug log for normalized string
+
+    // Remove all combining diacritical marks
+    Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+    String withoutDiacritics = pattern.matcher(normalized).replaceAll("");
+    log.info("Without Diacritics: {}", withoutDiacritics); // Debug log for string without diacritics
+
+    // Remove all non-alphabetic characters
+    String sanitized = withoutDiacritics.replaceAll("[^a-zA-Z ]", " ");
+    log.info("After Removing Non-Alphabetic Characters: {}", sanitized); // Debug log for sanitized string
+
+    // Trim extra spaces
+    sanitized = sanitized.replaceAll("\\s+", " ").trim();
+    log.info("Final Sanitized: {}", sanitized); // Debug log for final sanitized string
+
+    return sanitized;
+}
+
 }
