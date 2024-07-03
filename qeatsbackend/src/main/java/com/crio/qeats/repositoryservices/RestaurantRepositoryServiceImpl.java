@@ -54,17 +54,13 @@ public class RestaurantRepositoryServiceImpl implements RestaurantRepositoryServ
   }
 
   private String sanitizeRestaurantName(String name) {
-    StringBuilder sanitized = new StringBuilder();
+    // Use regex to replace non-alphabetic characters with a space
+    String sanitized = name.replaceAll("[^a-zA-Z ]", " ");
 
-    for (char c : name.toCharArray()) {
-        if (Character.isLetter(c) || c == ' ') {
-            sanitized.append(c);
-        } else {
-            sanitized.append(' '); // Replace non-alphabetic characters with space
-        }
-    }
+    // Replace multiple spaces with a single space and trim the result
+    sanitized = sanitized.replaceAll("\\s+", " ").trim();
 
-    return sanitized.toString().trim(); // Trim trailing spaces
+    return sanitized;
 }
 
   @Override
