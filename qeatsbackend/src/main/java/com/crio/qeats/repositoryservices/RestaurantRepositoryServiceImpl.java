@@ -1,6 +1,13 @@
+/*
+ *
+ *  * Copyright (c) Crio.Do 2019. All rights reserved
+ *
+ */
+
 package com.crio.qeats.repositoryservices;
 
 import ch.hsr.geohash.GeoHash;
+import com.crio.qeats.configs.RedisConfiguration;
 import com.crio.qeats.dto.Restaurant;
 import com.crio.qeats.globals.GlobalConstants;
 import com.crio.qeats.models.RestaurantEntity;
@@ -31,6 +38,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
+import redis.clients.jedis.Jedis;
 
 @Service
 @Primary
@@ -45,6 +53,10 @@ public class RestaurantRepositoryServiceImpl implements RestaurantRepositoryServ
 
   @Autowired
   RestaurantRepository restaurantRepository;
+
+  @Autowired
+  private RedisConfiguration redisConfiguration;
+
 
   private boolean isOpenNow(LocalTime time, RestaurantEntity res) {
     LocalTime openingTime = LocalTime.parse(res.getOpensAt());

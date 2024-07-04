@@ -1,3 +1,10 @@
+
+/*
+ *
+ *  * Copyright (c) Crio.Do 2019. All rights reserved
+ *
+ */
+
 package com.crio.qeats.utils;
 
 import lombok.AllArgsConstructor;
@@ -20,7 +27,8 @@ public class GeoUtils {
    * Haversine method as its base.
    *
    * <p>lat1, lon1 Start point lat2, lon2 End point el1 Start altitude in meters el2 End altitude
-   * in meters
+   * in
+   * meters
    *
    * @returns Distance in Kilo Meters
    */

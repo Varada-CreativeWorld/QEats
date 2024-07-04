@@ -87,8 +87,6 @@ public class RestaurantServiceMockitoTestStub {
     assertEquals("11", allRestaurantsCloseBy.getRestaurants().get(0).getRestaurantId());
     assertEquals("12", allRestaurantsCloseBy.getRestaurants().get(1).getRestaurantId());
 
-
-
     ArgumentCaptor<Double> servingRadiusInKms = ArgumentCaptor.forClass(Double.class);
     verify(restaurantRepositoryServiceMock, times(1))
         .findAllRestaurantsCloseBy(any(Double.class), any(Double.class), any(LocalTime.class),

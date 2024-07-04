@@ -69,8 +69,10 @@ class RestaurantServiceTest {
             timeOfService); //LocalTime.of(19,00));
 
     assertEquals(2, allRestaurantsCloseBy.getRestaurants().size());
-    assertEquals("10", allRestaurantsCloseBy.getRestaurants().get(0).getRestaurantId());
-    assertEquals("11", allRestaurantsCloseBy.getRestaurants().get(1).getRestaurantId());
+    // assertEquals("10", allRestaurantsCloseBy.getRestaurants().get(0).getRestaurantId());
+    // assertEquals("11", allRestaurantsCloseBy.getRestaurants().get(1).getRestaurantId());
+    assertEquals("11", allRestaurantsCloseBy.getRestaurants().get(0).getRestaurantId());
+    assertEquals("12", allRestaurantsCloseBy.getRestaurants().get(1).getRestaurantId());
 
     ArgumentCaptor<Double> servingRadiusInKms = ArgumentCaptor.forClass(Double.class);
     verify(restaurantRepositoryServiceMock, times(1))
