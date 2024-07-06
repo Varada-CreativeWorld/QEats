@@ -1,9 +1,3 @@
-/*
- *
- *  * Copyright (c) Crio.Do 2019. All rights reserved
- *
- */
-
 package com.crio.qeats.repositoryservices;
 
 import ch.hsr.geohash.GeoHash;
@@ -57,6 +51,8 @@ public class RestaurantRepositoryServiceImpl implements RestaurantRepositoryServ
   @Autowired
   private RedisConfiguration redisConfiguration;
 
+  @Autowired
+  private ObjectMapper objectMapper;
 
   private boolean isOpenNow(LocalTime time, RestaurantEntity res) {
     LocalTime openingTime = LocalTime.parse(res.getOpensAt());
@@ -72,25 +68,45 @@ public class RestaurantRepositoryServiceImpl implements RestaurantRepositoryServ
     log.info("findAllRestaurantsCloseBy called with latitude: {}, longitude: {}, currentTime: {}, servingRadiusInKms: {}",
         latitude, longitude, currentTime, servingRadiusInKms);
 
+    GeoHash geoHash = GeoHash.withCharacterPrecision(latitude, longitude, 7);
+    String cacheKey = geoHash.toBase32();
     List<Restaurant> restaurants = new ArrayList<>();
-    List<RestaurantEntity> results = restaurantRepository.findAll();
 
-    log.info("Total restaurants fetched from repository: {}", results.size());
-
-    ModelMapper modelMapper = modelMapperProvider.get();
-    for (RestaurantEntity res : results) {
-      log.info("Checking if restaurant {} is close by and open", res.getRestaurantId());
-
-      if (isRestaurantCloseByAndOpen(res, currentTime, latitude, longitude, servingRadiusInKms)) {
-        Restaurant temp = modelMapper.map(res, Restaurant.class);
-        restaurants.add(temp);
-        log.info("Restaurant {} is added to the list", res.getRestaurantId());
+    try (Jedis jedis = redisConfiguration.getJedisPool().getResource()) {
+      // Check cache first
+      String cachedData = jedis.get(cacheKey);
+      if (cachedData != null) {
+        log.info("Cache hit for key: {}", cacheKey);
+        restaurants = objectMapper.readValue(cachedData, new TypeReference<List<Restaurant>>() {});
+        return restaurants;
       } else {
-        log.info("Restaurant {} is not close by or not open", res.getRestaurantId());
+        log.info("Cache miss for key: {}", cacheKey);
       }
-    }
 
-    log.info("Total restaurants found close by and open: {}", restaurants.size());
+      // Fetch from repository if not in cache
+      List<RestaurantEntity> results = restaurantRepository.findAll();
+      log.info("Total restaurants fetched from repository: {}", results.size());
+
+      ModelMapper modelMapper = modelMapperProvider.get();
+      for (RestaurantEntity res : results) {
+        log.info("Checking if restaurant {} is close by and open", res.getRestaurantId());
+
+        if (isRestaurantCloseByAndOpen(res, currentTime, latitude, longitude, servingRadiusInKms)) {
+          Restaurant temp = modelMapper.map(res, Restaurant.class);
+          restaurants.add(temp);
+          log.info("Restaurant {} is added to the list", res.getRestaurantId());
+        } else {
+          log.info("Restaurant {} is not close by or not open", res.getRestaurantId());
+        }
+      }
+
+      log.info("Total restaurants found close by and open: {}", restaurants.size());
+
+      // Cache the result
+      jedis.setex(cacheKey, RedisConfiguration.REDIS_ENTRY_EXPIRY_IN_SECONDS, objectMapper.writeValueAsString(restaurants));
+    } catch (IOException e) {
+      log.error("Error processing JSON for cache", e);
+    }
 
     return restaurants;
   }
