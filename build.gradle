@@ -76,11 +76,6 @@ subprojects {
         mavenCentral()
     }
 
-    dependencies {
-        implementation 'redis.clients:jedis:3.6.0'
-        // other dependencies
-    }
-
     test {
         reports {
             junitXml.enabled = true
