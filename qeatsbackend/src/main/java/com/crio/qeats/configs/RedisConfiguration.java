@@ -1,4 +1,3 @@
-
 package com.crio.qeats.configs;
 
 import java.time.Duration;
@@ -25,6 +24,20 @@ public class RedisConfiguration {
   private int redisPort;
   private JedisPool jedisPool;
 
+  public JedisPool getJedisPool() {
+    if (jedisPool != null) {
+      return jedisPool;
+    }
+    try {
+      final JedisPoolConfig poolConfig = buildPoolConfig();
+      jedisPool = new JedisPool(poolConfig, redisHost, redisPort);
+    } catch (Exception e) {
+      // We don't want to do anything for if cache initialization fails.
+      e.printStackTrace();
+    }
+    return jedisPool;
+  }
+
 
   @Value("${spring.redis.port}")
   public void setRedisPort(int port) {
@@ -42,58 +55,11 @@ public class RedisConfiguration {
     try {
       jedisPool = new JedisPool(poolConfig, redisHost, redisPort);
     } catch (Exception e) {
+      // We don't want to do anything for if cache initialization fails.
       e.printStackTrace();
     }
   }
 
-
-
-  /**
-   * Checks is cache is intiailized and available.
-   * TIP: This would generally mean checking via {@link JedisPool}
-   * @return true / false if cache is available or not.
-   */
-  public boolean isCacheAvailable() {
-    if (jedisPool == null) {
-      return false;
-    }
-    try (Jedis jedis = this.getJedisPool().getResource()) {
-      return true;
-    } catch (Exception e) {
-      return false;
-    }
-    
-  }
-
-  /**
-   * Destroy the cache.
-   * TIP: This is useful if cache is stale or while performing tests.
-   */
-  public void destroyCache() {
-    if (jedisPool != null) {
-    jedisPool.getResource().flushAll();
-    jedisPool.destroy();
-    jedisPool = null;
-    }
-  }
-    
-
-  public JedisPool getJedisPool() {
-    if (jedisPool != null) {
-      return jedisPool;
-    }
-    
-    try {
-      final JedisPoolConfig poolConfig = buildPoolConfig();
-      jedisPool = new JedisPool(poolConfig, redisHost, redisPort);
-    } catch (Exception e) {
-     // We don't want to do anything for if cache initialization fails.
-      e.printStackTrace();
-    }
-    
-      return jedisPool;
-  }
-    
   private static JedisPoolConfig buildPoolConfig() {
     final JedisPoolConfig poolConfig = new JedisPoolConfig();
     poolConfig.setMaxTotal(128);
@@ -108,8 +74,36 @@ public class RedisConfiguration {
     poolConfig.setBlockWhenExhausted(true);
     return poolConfig;
   }
-    
 
+  /**
+   * Checks if cache is intiailized and available.
+   * TIP: This would generally mean checking via {@link JedisPool }
+   * @return true / false if cache is available or not.
+   */
+  public boolean isCacheAvailable() {
+    if (jedisPool == null) {
+      return false;
+    }
 
+    try (Jedis jedis = getJedisPool().getResource()) {
+      return true;
+    } catch (Exception e) {
+      // e.printStackTrace();
+      return false;
+    }
+
+  }
+
+  /**
+   * Destroy the cache.
+   * TIP: This is useful if cache is stale or while performing tests.
+   */
+  public void destroyCache() {
+    if (jedisPool != null) {
+      jedisPool.getResource().flushAll();
+      jedisPool.destroy();
+      jedisPool = null;
+}
 }
 
+}
