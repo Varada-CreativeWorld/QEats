@@ -101,6 +101,79 @@ public class RestaurantControllerTest {
     mvc = MockMvcBuilders.standaloneSetup(restaurantController).build();
   }
 
+  @Test
+  public void correctQueryReturnsOkResponseAndListOfRestaurants() throws Exception {
+    GetRestaurantsResponse sampleResponse = loadSampleResponseList();
+    assertNotNull(sampleResponse);
+
+    when(restaurantService
+        .findAllRestaurantsCloseBy(any(GetRestaurantsRequest.class), any(LocalTime.class)))
+        .thenReturn(sampleResponse);
+
+    ArgumentCaptor<GetRestaurantsRequest> argumentCaptor = ArgumentCaptor
+        .forClass(GetRestaurantsRequest.class);
+
+    URI uri = UriComponentsBuilder
+        .fromPath(RESTAURANT_API_URI)
+        .queryParam("latitude", "20.21")
+        .queryParam("longitude", "30.31")
+        .build().toUri();
+
+    assertEquals(RESTAURANT_API_URI + "?latitude=20.21&longitude=30.31", uri.toString());
+
+    MockHttpServletResponse response = mvc.perform(
+        get(uri.toString()).accept(APPLICATION_JSON_UTF8)
+    ).andReturn().getResponse();
+
+    assertEquals(HttpStatus.OK.value(), response.getStatus());
+
+    verify(restaurantService, times(1))
+        .findAllRestaurantsCloseBy(argumentCaptor.capture(), any(LocalTime.class));
+
+    assertEquals("20.21", argumentCaptor.getValue().getLatitude().toString());
+
+    assertEquals("30.31", argumentCaptor.getValue().getLongitude().toString());
+
+  }
+
+  @Test
+  public void getRestaurantsBySearchStringAndLatLong() throws Exception {
+    GetRestaurantsResponse sampleResponse = loadSampleResponseList();
+    assertNotNull(sampleResponse);
+
+    when(restaurantService
+        .findAllRestaurantsCloseBy(any(GetRestaurantsRequest.class), any(LocalTime.class)))
+        .thenReturn(sampleResponse);
+
+    ArgumentCaptor<GetRestaurantsRequest> argumentCaptor = ArgumentCaptor
+        .forClass(GetRestaurantsRequest.class);
+
+    URI uri = UriComponentsBuilder
+        .fromPath(RESTAURANT_API_URI)
+        .queryParam("latitude", "20.21")
+        .queryParam("longitude", "30.31")
+        .queryParam("searchFor", "Briyani")
+        .build().toUri();
+
+    assertEquals(RESTAURANT_API_URI + "?latitude=20.21&longitude=30.31&searchFor=Briyani",
+        uri.toString());
+
+    MockHttpServletResponse response = mvc.perform(
+        get(uri.toString()).accept(APPLICATION_JSON_UTF8)
+    ).andReturn().getResponse();
+
+    assertEquals(HttpStatus.OK.value(), response.getStatus());
+
+    verify(restaurantService, times(1))
+        .findRestaurantsBySearchQuery(argumentCaptor.capture(), any(LocalTime.class));
+
+    assertEquals("20.21", argumentCaptor.getValue().getLatitude().toString());
+
+    assertEquals("30.31", argumentCaptor.getValue().getLongitude().toString());
+
+    assertEquals("Briyani", argumentCaptor.getValue().getSearchFor());
+
+  }
 
   @Test
   public void invalidLatitudeResultsInBadHttpRequest() throws Exception {
@@ -133,7 +206,6 @@ public class RestaurantControllerTest {
     assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
   }
 
-  //-90 TO 90 latitude
   @Test
   public void invalidLongitudeResultsInBadHttpRequest() throws Exception {
     URI uri = UriComponentsBuilder
@@ -159,7 +231,6 @@ public class RestaurantControllerTest {
 
     assertEquals(RESTAURANT_API_URI + "?latitude=10&longitude=-181", uri.toString());
 
-    // calling api with invalid longitude
     response = mvc.perform(
         get(uri.toString()).accept(APPLICATION_JSON_UTF8)
     ).andReturn().getResponse();
@@ -169,7 +240,6 @@ public class RestaurantControllerTest {
 
   @Test
   public void incorrectlySpelledLongitudeParamResultsInBadHttpRequest() throws Exception {
-    // mocks not required, since validation will fail before that.
     URI uri = UriComponentsBuilder
         .fromPath(RESTAURANT_API_URI)
         .queryParam("latitude", "10")
@@ -188,7 +258,6 @@ public class RestaurantControllerTest {
 
   @Test
   public void incorrectlySpelledLatitudeParamResultsInBadHttpRequest() throws Exception {
-    // mocks not required, since validation will fail before that.
     URI uri = UriComponentsBuilder
         .fromPath(RESTAURANT_API_URI)
         .queryParam("laitude", "10")
@@ -207,14 +276,12 @@ public class RestaurantControllerTest {
 
   @Test
   public void noRequestParamResultsInBadHttpReuest() throws Exception {
-    // mocks not required, since validation will fail before that.
     URI uri = UriComponentsBuilder
         .fromPath(RESTAURANT_API_URI)
         .build().toUri();
 
     assertEquals(RESTAURANT_API_URI, uri.toString());
 
-    // calling api without latitude and longitude
     MockHttpServletResponse response = mvc.perform(
         get(uri.toString()).accept(APPLICATION_JSON_UTF8)
     ).andReturn().getResponse();
@@ -224,7 +291,6 @@ public class RestaurantControllerTest {
 
   @Test
   public void missingLongitudeParamResultsInBadHttpRequest() throws Exception {
-    // calling api without latitude
     URI uri = UriComponentsBuilder
         .fromPath(RESTAURANT_API_URI)
         .queryParam("latitude", "20.21")
@@ -241,7 +307,6 @@ public class RestaurantControllerTest {
 
   @Test
   public void missingLatitudeParamResultsInBadHttpRequest() throws Exception {
-    // calling api without longitude
     URI uri = UriComponentsBuilder
         .fromPath(RESTAURANT_API_URI)
         .queryParam("longitude", "30.31")
@@ -258,6 +323,21 @@ public class RestaurantControllerTest {
 
 
 
+  private GetRestaurantsResponse loadSampleResponseList() throws IOException {
+    String fixture =
+        FixtureHelpers.fixture(FIXTURES + "/list_restaurant_response.json");
+
+    return objectMapper.readValue(fixture,
+        new TypeReference<GetRestaurantsResponse>() {
+        });
+  }
+
+  private GetRestaurantsResponse loadSampleRequest() throws IOException {
+    String fixture =
+        FixtureHelpers.fixture(FIXTURES + "/create_restaurant_request.json");
+
+    return objectMapper.readValue(fixture, GetRestaurantsResponse.class);
+  }
 
 }
 
