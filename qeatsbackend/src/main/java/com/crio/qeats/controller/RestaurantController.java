@@ -47,7 +47,13 @@ public class RestaurantController {
     }
 
     try {
-      GetRestaurantsResponse getRestaurantsResponse = restaurantService.findAllRestaurantsCloseBy(rq, LocalTime.now());
+      GetRestaurantsResponse getRestaurantsResponse;
+
+      if (rq.getSearchFor() != null && !rq.getSearchFor().trim().isEmpty()) {
+          getRestaurantsResponse = restaurantService.findRestaurantsBySearchQuery(rq, LocalTime.now());
+      } else {
+          getRestaurantsResponse = restaurantService.findAllRestaurantsCloseBy(rq, LocalTime.now());
+      }
       
       // Sanitize restaurant names
       getRestaurantsResponse.getRestaurants().forEach(restaurant -> {

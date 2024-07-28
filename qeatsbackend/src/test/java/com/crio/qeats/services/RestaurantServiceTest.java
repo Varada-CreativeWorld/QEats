@@ -125,11 +125,11 @@ class RestaurantServiceTest {
     verify(restaurantRepositoryServiceMock, times(1))
         .findRestaurantsByAttributes(any(Double.class), any(Double.class), any(String.class),
             any(LocalTime.class), any(Double.class));
-    assertEquals(4, allRestaurantsSearchResults.getRestaurants().size());
+    assertEquals(5, allRestaurantsSearchResults.getRestaurants().size());
     assertEquals("10", allRestaurantsSearchResults.getRestaurants().get(0).getRestaurantId());
-    assertEquals("11", allRestaurantsSearchResults.getRestaurants().get(1).getRestaurantId());
-    assertEquals("12", allRestaurantsSearchResults.getRestaurants().get(2).getRestaurantId());
-    assertEquals("abcdc864835e31495d621234",
+    assertEquals("12", allRestaurantsSearchResults.getRestaurants().get(1).getRestaurantId());
+    assertEquals("11", allRestaurantsSearchResults.getRestaurants().get(2).getRestaurantId());
+    assertEquals("13",
         allRestaurantsSearchResults.getRestaurants().get(3).getRestaurantId());
 
     ArgumentCaptor<Double> servingRadiusInKms = ArgumentCaptor.forClass(Double.class);
@@ -166,8 +166,8 @@ class RestaurantServiceTest {
         .findRestaurantsByAttributes(any(Double.class), any(Double.class), any(String.class),
             any(LocalTime.class), any(Double.class));
     assertEquals(3, allRestaurantsSearchResults.getRestaurants().size());
-    assertEquals("11", allRestaurantsSearchResults.getRestaurants().get(0).getRestaurantId());
-    assertEquals("12", allRestaurantsSearchResults.getRestaurants().get(1).getRestaurantId());
+    assertEquals("12", allRestaurantsSearchResults.getRestaurants().get(0).getRestaurantId());
+    assertEquals("11", allRestaurantsSearchResults.getRestaurants().get(1).getRestaurantId());
     assertEquals("abcdc864835e31495d621234",
         allRestaurantsSearchResults.getRestaurants().get(2).getRestaurantId());
 

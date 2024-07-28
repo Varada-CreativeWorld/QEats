@@ -11,6 +11,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -24,7 +25,7 @@ import lombok.NonNull;
 //  this class should be able to deserialize lat/long and optional searchFor from that.
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
+// @AllArgsConstructor
 public class GetRestaurantsRequest {
 
    @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -33,6 +34,18 @@ public class GetRestaurantsRequest {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Double longitude;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String searchFor;
 
+    public GetRestaurantsRequest(Double latitude, Double longitude) {
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
+
+    public GetRestaurantsRequest(Double latitude, Double longitude, String searchFor) {
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.searchFor = searchFor;
+    }
 }
 

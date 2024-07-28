@@ -94,7 +94,49 @@ public class RestaurantServiceImpl implements RestaurantService {
   public GetRestaurantsResponse findRestaurantsBySearchQuery(
       GetRestaurantsRequest getRestaurantsRequest, LocalTime currentTime) {
 
-     return null;
+        String searchString = getRestaurantsRequest.getSearchFor();
+        Double latitude = getRestaurantsRequest.getLatitude();
+        Double longitude = getRestaurantsRequest.getLongitude();
+
+        
+        if (searchString == null || searchString.trim().isEmpty()){
+          return new GetRestaurantsResponse(new ArrayList<>());
+        }
+        
+        boolean isPeakHours = isPeakHours(currentTime);
+        double serviceRadius = isPeakHours ? peakHoursServingRadiusInKms : normalHoursServingRadiusInKms;
+      
+        // Use a set to avoid duplicates
+        Set<Restaurant> restaurantSet = new HashSet<>();
+      
+        // Query restaurants by name
+        List<Restaurant> byName = restaurantRepositoryService.findRestaurantsByName(
+            latitude, longitude, searchString, currentTime, serviceRadius);
+        restaurantSet.addAll(byName);
+      
+        // Query restaurants by attributes (cuisines)
+        List<Restaurant> byAttributes = restaurantRepositoryService.findRestaurantsByAttributes(
+            latitude, longitude, searchString, currentTime, serviceRadius);
+        restaurantSet.addAll(byAttributes);
+      
+        // Query restaurants by item name
+        List<Restaurant> byItemName = restaurantRepositoryService.findRestaurantsByItemName(
+            latitude, longitude, searchString, currentTime, serviceRadius);
+        restaurantSet.addAll(byItemName);
+      
+        // Query restaurants by item attributes
+        List<Restaurant> byItemAttributes = restaurantRepositoryService.findRestaurantsByItemAttributes(
+            latitude, longitude, searchString, currentTime, serviceRadius);
+        restaurantSet.addAll(byItemAttributes);
+      
+        // Convert the set to a list
+        List<Restaurant> combinedRestaurants = new ArrayList<>(restaurantSet);
+      
+        // Create response
+        GetRestaurantsResponse response = new GetRestaurantsResponse();
+        response.setRestaurants(combinedRestaurants);
+      
+        return response;
   }
 
 }
