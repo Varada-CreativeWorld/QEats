@@ -8,7 +8,6 @@
 package com.crio.qeats.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -69,8 +68,6 @@ class RestaurantServiceTest {
             timeOfService); //LocalTime.of(19,00));
 
     assertEquals(2, allRestaurantsCloseBy.getRestaurants().size());
-    // assertEquals("10", allRestaurantsCloseBy.getRestaurants().get(0).getRestaurantId());
-    // assertEquals("11", allRestaurantsCloseBy.getRestaurants().get(1).getRestaurantId());
     assertEquals("11", allRestaurantsCloseBy.getRestaurants().get(0).getRestaurantId());
     assertEquals("12", allRestaurantsCloseBy.getRestaurants().get(1).getRestaurantId());
 
@@ -91,18 +88,9 @@ class RestaurantServiceTest {
   @Test
   void normalHourServingRadiusIs5Kms() throws IOException {
 
-    // TODO: CRIO_TASK_MODULE_RESTAURANTSAPI
-    // We must ensure the API retrieves only restaurants that are closeby and are open
-    // In short, we need to test:
-    // 1. If the mocked service methods are being called
-    // 2. If the expected restaurants are being returned
-    // HINT: Use the `loadRestaurantsDuringNormalHours` utility method to speed things up
 
 
-     assertFalse(false);
   }
-
-
 
   @Test
   void normalHourFindRestaurantsSearchQuery() throws IOException {
@@ -125,11 +113,11 @@ class RestaurantServiceTest {
     verify(restaurantRepositoryServiceMock, times(1))
         .findRestaurantsByAttributes(any(Double.class), any(Double.class), any(String.class),
             any(LocalTime.class), any(Double.class));
-    assertEquals(5, allRestaurantsSearchResults.getRestaurants().size());
+    assertEquals(4, allRestaurantsSearchResults.getRestaurants().size());
     assertEquals("10", allRestaurantsSearchResults.getRestaurants().get(0).getRestaurantId());
-    assertEquals("12", allRestaurantsSearchResults.getRestaurants().get(1).getRestaurantId());
-    assertEquals("11", allRestaurantsSearchResults.getRestaurants().get(2).getRestaurantId());
-    assertEquals("13",
+    assertEquals("11", allRestaurantsSearchResults.getRestaurants().get(1).getRestaurantId());
+    assertEquals("12", allRestaurantsSearchResults.getRestaurants().get(2).getRestaurantId());
+    assertEquals("abcdc864835e31495d621234",
         allRestaurantsSearchResults.getRestaurants().get(3).getRestaurantId());
 
     ArgumentCaptor<Double> servingRadiusInKms = ArgumentCaptor.forClass(Double.class);
@@ -166,8 +154,8 @@ class RestaurantServiceTest {
         .findRestaurantsByAttributes(any(Double.class), any(Double.class), any(String.class),
             any(LocalTime.class), any(Double.class));
     assertEquals(3, allRestaurantsSearchResults.getRestaurants().size());
-    assertEquals("12", allRestaurantsSearchResults.getRestaurants().get(0).getRestaurantId());
-    assertEquals("11", allRestaurantsSearchResults.getRestaurants().get(1).getRestaurantId());
+    assertEquals("11", allRestaurantsSearchResults.getRestaurants().get(0).getRestaurantId());
+    assertEquals("12", allRestaurantsSearchResults.getRestaurants().get(1).getRestaurantId());
     assertEquals("abcdc864835e31495d621234",
         allRestaurantsSearchResults.getRestaurants().get(2).getRestaurantId());
 

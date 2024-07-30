@@ -57,6 +57,9 @@ public class RestaurantRepositoryServiceImpl implements RestaurantRepositoryServ
   MenuRepository menuRepository;
 
   @Autowired
+  ItemRepository itemRepository;
+
+  @Autowired
   private RedisConfiguration redisConfiguration;
 
   @Autowired
@@ -143,28 +146,34 @@ public class RestaurantRepositoryServiceImpl implements RestaurantRepositoryServ
   public List<Restaurant> findRestaurantsByName(Double latitude, Double longitude,
       String searchString, LocalTime currentTime, Double servingRadiusInKms) {
 
-        log.info("findRestaurantsByName called with latitude: {}, longitude: {}, searchString: {}, currentTime: {}, servingRadiusInKms: {}",
-        latitude, longitude, searchString, currentTime, servingRadiusInKms);
-  
-        List<RestaurantEntity> results = restaurantRepository.findAll();
-        List<Restaurant> matchingRestaurants = new ArrayList<>();
         ModelMapper modelMapper = modelMapperProvider.get();
-      
-        for (RestaurantEntity res : results) {
-          if (res.getName().toLowerCase().contains(searchString.toLowerCase()) &&
-              isRestaurantCloseByAndOpen(res, currentTime, latitude, longitude, servingRadiusInKms)) {
-            
-            Restaurant temp = modelMapper.map(res, Restaurant.class);
-            matchingRestaurants.add(temp);
-            log.info("Restaurant {} matches search and is added to the list", res.getRestaurantId());
+        Set<String> restaurantSet = new HashSet<>();
+        List<Restaurant> restaurantList = new ArrayList<>();
+        Optional<List<RestaurantEntity>> optionalExactRestaurantEntityList = restaurantRepository.findRestaurantsByNameExact(searchString);
+        if (optionalExactRestaurantEntityList.isPresent()) {
+          List<RestaurantEntity> restaurantEntityList = optionalExactRestaurantEntityList.get();
+          for (RestaurantEntity restaurantEntity : restaurantEntityList) {
+              if (isRestaurantCloseByAndOpen(restaurantEntity, currentTime,latitude, longitude, servingRadiusInKms) &&!restaurantSet.contains(restaurantEntity.getRestaurantId())) {
+                  restaurantList.add(modelMapper.map(restaurantEntity,
+  Restaurant.class));
+                  restaurantSet.add(restaurantEntity.getRestaurantId());
+              }
           }
         }
-      
-        log.info("Total restaurants found matching search criteria: {}", matchingRestaurants.size());
-      
-        return matchingRestaurants;
-
+        Optional<List<RestaurantEntity>> optionalInexactRestaurantEntityList = restaurantRepository.findRestaurantsByName(searchString);
+        if (optionalInexactRestaurantEntityList.isPresent()) {
+          List<RestaurantEntity> restaurantEntityList = optionalInexactRestaurantEntityList.get();
+          for (RestaurantEntity restaurantEntity : restaurantEntityList) {
+              if (isRestaurantCloseByAndOpen(restaurantEntity, currentTime,latitude, longitude, servingRadiusInKms) && !restaurantSet.contains(restaurantEntity.getRestaurantId())) {
+                  restaurantList.add(modelMapper.map(restaurantEntity,
+  Restaurant.class));
+                  restaurantSet.add(restaurantEntity.getRestaurantId());
+              }
+          }
+        }
+        return restaurantList;
   }
+  
 
 
   // TODO: CRIO_TASK_MODULE_RESTAURANTSEARCH
@@ -175,27 +184,22 @@ public class RestaurantRepositoryServiceImpl implements RestaurantRepositoryServ
       Double latitude, Double longitude,
       String searchString, LocalTime currentTime, Double servingRadiusInKms) {
 
-        log.info("findRestaurantsByAttributes called with latitude: {}, longitude: {}, searchString: {}, currentTime: {}, servingRadiusInKms: {}",
-        latitude, longitude, searchString, currentTime, servingRadiusInKms);
-  
-        List<RestaurantEntity> results = restaurantRepository.findAll();
-        List<Restaurant> matchingRestaurants = new ArrayList<>();
+        List<Pattern> patterns = Arrays.stream(searchString.split(" ")).map(attr -> Pattern.compile(attr, Pattern.CASE_INSENSITIVE)).collect(Collectors.toList());
+        Query query = new Query();
+        for (Pattern pattern : patterns) {
+          query.addCriteria(Criteria.where("attributes").regex(pattern));
+        }
+        List<RestaurantEntity> restaurantEntityList = mongoTemplate.find(query, RestaurantEntity.class);
+        List<Restaurant> restaurantList = new ArrayList<>();
         ModelMapper modelMapper = modelMapperProvider.get();
-        
-        for (RestaurantEntity res : results) {
-          boolean matches = res.getAttributes() != null && res.getAttributes().stream()
-              .anyMatch(attribute -> attribute.toLowerCase().contains(searchString.toLowerCase()));
-      
-          if (matches && isRestaurantCloseByAndOpen(res, currentTime, latitude, longitude, servingRadiusInKms)) {
-            Restaurant temp = modelMapper.map(res, Restaurant.class);
-            matchingRestaurants.add(temp);
-            log.info("Restaurant {} matches search by attributes and is added to the list", res.getRestaurantId());
+        for (RestaurantEntity restaurantEntity : restaurantEntityList) {
+          if (isRestaurantCloseByAndOpen(restaurantEntity, currentTime,
+            latitude, longitude, servingRadiusInKms)) {
+            restaurantList.add(modelMapper.map(restaurantEntity,
+            Restaurant.class));
           }
         }
-      
-        log.info("Total restaurants found matching search by attributes: {}", matchingRestaurants.size());
-      
-        return matchingRestaurants;
+        return restaurantList;
   }
 
 
@@ -210,32 +214,13 @@ public class RestaurantRepositoryServiceImpl implements RestaurantRepositoryServ
       Double latitude, Double longitude,
       String searchString, LocalTime currentTime, Double servingRadiusInKms) {
 
-        log.info("findRestaurantsByItemName called with latitude: {}, longitude: {}, searchString: {}, currentTime: {}, servingRadiusInKms: {}",
-        latitude, longitude, searchString, currentTime, servingRadiusInKms);
-  
-        List<Restaurant> matchingRestaurants = new ArrayList<>();
-        List<RestaurantEntity> allRestaurants = restaurantRepository.findAll();
-        ModelMapper modelMapper = modelMapperProvider.get();
-      
-        for (RestaurantEntity restaurant : allRestaurants) {
-          if (isRestaurantCloseByAndOpen(restaurant, currentTime, latitude, longitude, servingRadiusInKms)) {
-            Optional<MenuEntity> menuEntityOpt = menuRepository.findMenuByRestaurantId(restaurant.getRestaurantId());
-            if (menuEntityOpt.isPresent()) {
-              MenuEntity menuEntity = menuEntityOpt.get();
-              for (Item item : menuEntity.getItems()) {
-                if (item.getName().toLowerCase().contains(searchString.toLowerCase())) {
-                  Restaurant temp = modelMapper.map(restaurant, Restaurant.class);
-                  matchingRestaurants.add(temp);
-                  log.info("Restaurant {} has item {} matching search and is added to the list", restaurant.getRestaurantId(), item.getName());
-                  break; // Found a matching item, no need to check further items for this restaurant
-                }
-              }
-            }
-          }
-        }
-      
-        log.info("Total restaurants found matching item name criteria: {}", matchingRestaurants.size());
-        return matchingRestaurants;
+        String regex = String.join("|", Arrays.asList(searchString.split("")));
+        Optional<List<ItemEntity>> optionalExactItems = itemRepository.findItemsByNameExact(searchString);
+        Optional<List<ItemEntity>> optionalInexactItems = itemRepository.findItemsByNameInexact(regex);
+        List<ItemEntity> itemEntityList = optionalExactItems.orElseGet(ArrayList::new);
+        List<ItemEntity> inexactItemEntityList = optionalInexactItems.orElseGet(ArrayList::new);
+        itemEntityList.addAll(inexactItemEntityList);
+        return getRestaurantListServingItems(latitude, longitude, currentTime, servingRadiusInKms, itemEntityList);
   }
 
   // TODO: CRIO_TASK_MODULE_RESTAURANTSEARCH
@@ -244,38 +229,38 @@ public class RestaurantRepositoryServiceImpl implements RestaurantRepositoryServ
   @Override
   public List<Restaurant> findRestaurantsByItemAttributes(Double latitude, Double longitude,
       String searchString, LocalTime currentTime, Double servingRadiusInKms) {
-        log.info("findRestaurantsByItemAttributes called with latitude: {}, longitude: {}, searchString: {}, currentTime: {}, servingRadiusInKms: {}",
-        latitude, longitude, searchString, currentTime, servingRadiusInKms);
-  
-        List<MenuEntity> menus = menuRepository.findAll();
-        List<Restaurant> matchingRestaurants = new ArrayList<>();
-        ModelMapper modelMapper = modelMapperProvider.get();
-        Set<String> restaurantIds = new HashSet<>();
-      
-        for (MenuEntity menu : menus) {
-          boolean matches = menu.getItems() != null && menu.getItems().stream()
-              .anyMatch(item -> item.getAttributes() != null &&
-                  item.getAttributes().stream()
-                      .anyMatch(attribute -> attribute.toLowerCase().contains(searchString.toLowerCase())));
-      
-          if (matches) {
-            RestaurantEntity res = restaurantRepository.findById(menu.getRestaurantId()).orElse(null);
-            if (res != null && !restaurantIds.contains(res.getRestaurantId()) &&
-                isRestaurantCloseByAndOpen(res, currentTime, latitude, longitude, servingRadiusInKms)) {
-      
-              Restaurant temp = modelMapper.map(res, Restaurant.class);
-              matchingRestaurants.add(temp);
-              restaurantIds.add(res.getRestaurantId());
-              log.info("Restaurant {} matches search by item attributes and is added to the list", res.getRestaurantId());
-            }
-          }
+        List<Pattern> patterns = Arrays.stream(searchString.split(" ")).map(attr -> Pattern.compile(attr, Pattern.CASE_INSENSITIVE)).collect(Collectors.toList());
+        Query query = new Query();
+        for (Pattern pattern : patterns) {
+          query.addCriteria(Criteria.where("attributes").regex(pattern));
         }
-      
-        log.info("Total restaurants found matching search by item attributes: {}", matchingRestaurants.size());
-      
-        return matchingRestaurants;
+        List<ItemEntity> itemEntityList = mongoTemplate.find(query,ItemEntity.class);
+        return getRestaurantListServingItems(latitude, longitude,currentTime, servingRadiusInKms,itemEntityList);
   }
 
+  private List<Restaurant> getRestaurantListServingItems(Double latitude, Double longitude, LocalTime currentTime, Double servingRadiusInKms, List<ItemEntity>itemEntityList) {
+    List<String> itemIdList = itemEntityList.stream().map(ItemEntity::getItemId).collect(Collectors.toList());
+    Optional<List<MenuEntity>> optionalMenuEntityList = menuRepository.findMenusByItemsItemIdIn(itemIdList);
+    Optional<List<RestaurantEntity>> optionalRestaurantEntityList = Optional.empty();
+    if (optionalMenuEntityList.isPresent()) {
+      List<MenuEntity> menuEntityList = optionalMenuEntityList.get();
+      List<String> restaurantIdList = menuEntityList.stream().map(MenuEntity::getRestaurantId).collect(Collectors.toList());
+      optionalRestaurantEntityList = restaurantRepository.findRestaurantsByRestaurantIdIn(restaurantIdList);
+    }
+    List<Restaurant> restaurantList = new ArrayList<>();
+    ModelMapper modelMapper = modelMapperProvider.get();
+    if (optionalRestaurantEntityList.isPresent()) {
+      List<RestaurantEntity> restaurantEntityList = optionalRestaurantEntityList.get();
+      List<RestaurantEntity> restaurantEntitiesFiltered = new ArrayList<>();
+      for (RestaurantEntity restaurantEntity : restaurantEntityList) {
+          if (isRestaurantCloseByAndOpen(restaurantEntity, currentTime, latitude, longitude,servingRadiusInKms)) {
+              restaurantEntitiesFiltered.add(restaurantEntity);
+          }
+      }
+      restaurantList = restaurantEntitiesFiltered.stream().map(restaurantEntity -> modelMapper.map(restaurantEntity,Restaurant.class)).collect(Collectors.toList());
+    }
+    return restaurantList;
+  }
 }
 
 
