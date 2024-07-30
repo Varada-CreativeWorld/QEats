@@ -1,3 +1,9 @@
+/*
+ *
+ *  * Copyright (c) Crio.Do 2019. All rights reserved
+ *
+ */
+
 package com.crio.qeats.repositoryservices;
 
 import ch.hsr.geohash.GeoHash;
@@ -204,10 +210,6 @@ public class RestaurantRepositoryServiceImpl implements RestaurantRepositoryServ
 
 
 
-  // TODO: CRIO_TASK_MODULE_RESTAURANTSEARCH
-  // Objective:
-  // Find restaurants which serve food items whose names form a complete or partial match
-  // with the search query.
 
   @Override
   public List<Restaurant> findRestaurantsByItemName(
@@ -262,14 +264,3 @@ public class RestaurantRepositoryServiceImpl implements RestaurantRepositoryServ
     return restaurantList;
   }
 }
-
-
-
-
-
-
-
-
-
-
-

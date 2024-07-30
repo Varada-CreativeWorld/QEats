@@ -75,29 +75,29 @@ public class RestaurantController {
     }
   }
 
-  private boolean isValidLatitude(double latitude) {
-    return latitude >= -90 && latitude <= 90;
-  }
+  // private boolean isValidLatitude(double latitude) {
+  //   return latitude >= -90 && latitude <= 90;
+  // }
 
-  private boolean isValidLongitude(double longitude) {
-    return longitude >= -180 && longitude <= 180;
-  }
+  // private boolean isValidLongitude(double longitude) {
+  //   return longitude >= -180 && longitude <= 180;
+  // }
 
-  private String sanitizeRestaurantName(String name) {
-    // Normalize the string to decompose special characters
-    String normalized = Normalizer.normalize(name, Normalizer.Form.NFD);
+  // private String sanitizeRestaurantName(String name) {
+  //   // Normalize the string to decompose special characters
+  //   String normalized = Normalizer.normalize(name, Normalizer.Form.NFD);
 
-    // Remove all combining diacritical marks
-    Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
-    String withoutDiacritics = pattern.matcher(normalized).replaceAll("");
+  //   // Remove all combining diacritical marks
+  //   Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+  //   String withoutDiacritics = pattern.matcher(normalized).replaceAll("");
 
-    // Remove all non-alphabetic characters
-    String sanitized = withoutDiacritics.replaceAll("[^a-zA-Z ]", "");
+  //   // Remove all non-alphabetic characters
+  //   String sanitized = withoutDiacritics.replaceAll("[^a-zA-Z ]", "");
 
-    // Trim extra spaces
-    sanitized = sanitized.replaceAll("\\s+", " ").trim();
+  //   // Trim extra spaces
+  //   sanitized = sanitized.replaceAll("\\s+", " ").trim();
 
-    return sanitized;
-  }
+  //   return sanitized;
+  // }
 
 }
