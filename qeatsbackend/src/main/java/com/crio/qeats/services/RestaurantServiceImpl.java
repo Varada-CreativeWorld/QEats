@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import lombok.extern.log4j.Log4j2;
@@ -120,49 +121,6 @@ public class RestaurantServiceImpl implements RestaurantService {
         return new GetRestaurantsResponse(new ArrayList<>());
       }
 
-        // String searchString = getRestaurantsRequest.getSearchFor();
-        // Double latitude = getRestaurantsRequest.getLatitude();
-        // Double longitude = getRestaurantsRequest.getLongitude();
-
-        
-        // if (searchString == null || searchString.trim().isEmpty()){
-        //   return new GetRestaurantsResponse(new ArrayList<>());
-        // }
-        
-        // boolean isPeakHours = isPeakHours(currentTime);
-        // double serviceRadius = isPeakHours ? peakHoursServingRadiusInKms : normalHoursServingRadiusInKms;
-      
-        // // Use a set to avoid duplicates
-        // Set<Restaurant> restaurantSet = new HashSet<>();
-      
-        // // Query restaurants by name
-        // List<Restaurant> byName = restaurantRepositoryService.findRestaurantsByName(
-        //     latitude, longitude, searchString, currentTime, serviceRadius);
-        // restaurantSet.addAll(byName);
-      
-        // // Query restaurants by attributes (cuisines)
-        // List<Restaurant> byAttributes = restaurantRepositoryService.findRestaurantsByAttributes(
-        //     latitude, longitude, searchString, currentTime, serviceRadius);
-        // restaurantSet.addAll(byAttributes);
-      
-        // // Query restaurants by item name
-        // List<Restaurant> byItemName = restaurantRepositoryService.findRestaurantsByItemName(
-        //     latitude, longitude, searchString, currentTime, serviceRadius);
-        // restaurantSet.addAll(byItemName);
-      
-        // // Query restaurants by item attributes
-        // List<Restaurant> byItemAttributes = restaurantRepositoryService.findRestaurantsByItemAttributes(
-        //     latitude, longitude, searchString, currentTime, serviceRadius);
-        // restaurantSet.addAll(byItemAttributes);
-      
-        // // Convert the set to a list
-        // List<Restaurant> combinedRestaurants = new ArrayList<>(restaurantSet);
-      
-        // // Create response
-        // GetRestaurantsResponse response = new GetRestaurantsResponse();
-        // response.setRestaurants(combinedRestaurants);
-      
-        // return response;
   }
 
   private boolean isTimeWithInRange(LocalTime timeNow, LocalTime startTime, LocalTime endTime) {
@@ -179,10 +137,63 @@ public class RestaurantServiceImpl implements RestaurantService {
   // Implement variant of findRestaurantsBySearchQuery which is at least 1.5x time faster than
   // findRestaurantsBySearchQuery.
   @Override
-  public GetRestaurantsResponse findRestaurantsBySearchQueryMt(
-      GetRestaurantsRequest getRestaurantsRequest, LocalTime currentTime) {
+  public GetRestaurantsResponse findRestaurantsBySearchQueryMt(GetRestaurantsRequest getRestaurantsRequest, LocalTime currentTime) {
 
-     return null;
+    Double servingRadiusInKms = isPeakHour(currentTime) ? peakHoursServingRadiusInKms : normalHoursServingRadiusInKms;
+    String searchFor = getRestaurantsRequest.getSearchFor();
+
+    if (searchFor.isEmpty()) {
+      return new GetRestaurantsResponse(new ArrayList<>());
+    }
+
+    // Execute queries asynchronously
+    CompletableFuture<List<Restaurant>> byNameFuture = CompletableFuture.supplyAsync(() ->
+      restaurantRepositoryService.findRestaurantsByName(getRestaurantsRequest.getLatitude(), getRestaurantsRequest.getLongitude(), searchFor, currentTime, servingRadiusInKms)
+    );
+
+    CompletableFuture<List<Restaurant>> byAttributesFuture = CompletableFuture.supplyAsync(() ->
+      restaurantRepositoryService.findRestaurantsByAttributes(getRestaurantsRequest.getLatitude(), getRestaurantsRequest.getLongitude(), searchFor, currentTime, servingRadiusInKms)
+    );
+
+    CompletableFuture<List<Restaurant>> byItemNameFuture = CompletableFuture.supplyAsync(() ->
+      restaurantRepositoryService.findRestaurantsByItemName(getRestaurantsRequest.getLatitude(), getRestaurantsRequest.getLongitude(), searchFor, currentTime, servingRadiusInKms)
+    );
+
+    CompletableFuture<List<Restaurant>> byItemAttributesFuture = CompletableFuture.supplyAsync(() ->
+      restaurantRepositoryService.findRestaurantsByItemAttributes(getRestaurantsRequest.getLatitude(), getRestaurantsRequest.getLongitude(), searchFor, currentTime, servingRadiusInKms)
+    );
+
+    // Combine all futures
+    CompletableFuture<Void> allFutures = CompletableFuture.allOf(
+      byNameFuture, byAttributesFuture, byItemNameFuture, byItemAttributesFuture
+    );
+
+    // Gather results
+    List<Restaurant> combinedResults = new ArrayList<>();
+    Set<String> restaurantSet = new HashSet<>();
+
+    try {
+      allFutures.get();
+
+      addToRestaurantList(byNameFuture.get(), combinedResults, restaurantSet);
+      addToRestaurantList(byAttributesFuture.get(), combinedResults, restaurantSet);
+      addToRestaurantList(byItemNameFuture.get(), combinedResults, restaurantSet);
+      addToRestaurantList(byItemAttributesFuture.get(), combinedResults, restaurantSet);
+
+    } catch (InterruptedException | ExecutionException e) {
+      log.error("Exception occurred while fetching restaurants asynchronously", e);
+    }
+
+    return new GetRestaurantsResponse(combinedResults);
+  }
+
+  private void addToRestaurantList(List<Restaurant> restaurants, List<Restaurant> combinedResults, Set<String> restaurantSet) {
+    for (Restaurant restaurant : restaurants) {
+      if (!restaurantSet.contains(restaurant.getRestaurantId())) {
+        combinedResults.add(restaurant);
+        restaurantSet.add(restaurant.getRestaurantId());
+      }
+    }
   }
 }
 
